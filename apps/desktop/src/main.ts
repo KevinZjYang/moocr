@@ -520,6 +520,18 @@ ipcMain.handle('reveal', (_e, filePath: string) => {
   shell.showItemInFolder(filePath);
 });
 
+// 模型缺失时给用户一个能落地的地方，而不是只说"缺文件"
+ipcMain.handle('open-models-dir', async () => {
+  try {
+    const dir = path.join(findRoot(__dirname), 'resources', 'models');
+    fs.mkdirSync(dir, { recursive: true });
+    const err = await shell.openPath(dir);
+    return err ? { ok: false, error: err } : { ok: true, path: dir };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+});
+
 // 窗口按钮是系统画的，CSS 管不到，主题变了要单独告诉它
 ipcMain.handle('chrome-theme', (_e, dark: boolean) => {
   if (!win || win.isDestroyed()) return;

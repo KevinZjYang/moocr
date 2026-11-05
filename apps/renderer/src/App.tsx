@@ -561,7 +561,14 @@ export default function App(): JSX.Element {
 
       {caps && !caps.hasRuntime && (
         <div className="banner error">
-          缺少运行时资产（resources/models 里的 GGUF）。先执行 <code>bash scripts/m0-fetch.sh</code>。
+          缺少模型权重：<code>resources/models/Xiaomi-OCR-0.Q4_K_M.gguf</code> 与 <code>Xiaomi-OCR-0.mmproj-bf16.gguf</code>。
+          源码运行用 <code>npm run fetch</code> 下载，或<button
+            className="inline-action"
+            onClick={() => void api.openModelsDir().then((r) => setNotice(r.ok ? `已打开模型目录：${r.path}` : `打开失败：${r.error}`))}
+          >
+            打开模型目录
+          </button>
+          手动放入。
         </div>
       )}
       {notice && <div className="banner warn">{notice}</div>}

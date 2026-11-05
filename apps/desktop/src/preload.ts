@@ -34,6 +34,7 @@ export interface Api {
     savePath?: string;
   }): Promise<{ ok: true; path: string } | { ok: false; error?: string; canceled?: boolean }>;
   reveal(filePath: string): Promise<void>;
+  openModelsDir(): Promise<{ ok: boolean; path?: string; error?: string }>;
   claimArgv(): Promise<string[]>;
   cacheStats(): Promise<{ entries: number; bytes: number; hits: number; misses: number }>;
   cacheClear(): Promise<{ cleared: number }>;
@@ -65,6 +66,7 @@ const api: Api = {
   identify: (req) => ipcRenderer.invoke('identify', req),
   export: (req) => ipcRenderer.invoke('export', req),
   reveal: (filePath) => ipcRenderer.invoke('reveal', filePath),
+  openModelsDir: () => ipcRenderer.invoke('open-models-dir'),
   claimArgv: () => ipcRenderer.invoke('claim-argv'),
   cacheStats: () => ipcRenderer.invoke('cache-stats'),
   cacheClear: () => ipcRenderer.invoke('cache-clear'),
