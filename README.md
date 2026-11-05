@@ -4,6 +4,8 @@
 
 基于 [Xiaomi-OCR-0](https://huggingface.co/xiaomi-research/Xiaomi-OCR-0)（0.87B）+ llama.cpp Vulkan 后端。**全程本地，不联网，不上传。**
 
+> **下载**：Windows 版见 [Releases](https://github.com/KevinZjYang/moocr/releases)（安装包不含模型权重，首次启动会提示放哪两个文件）。
+
 ![主界面](docs/screenshot-main.png)
 
 ---
