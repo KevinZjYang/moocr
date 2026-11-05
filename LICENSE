@@ -1,0 +1,35 @@
+MIT License
+
+Copyright (c) 2026 moocr contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+关于模型权重
+
+本仓库不包含任何模型权重。运行时由 `npm run fetch` 从 Hugging Face 下载
+`prithivMLmods/Xiaomi-OCR-0-GGUF`（GGUF 量化版）与
+`xiaomi-research/Xiaomi-OCR-0`（原始权重、示例图）。
+
+- Xiaomi-OCR-0 由小米发布，许可证 Apache-2.0
+- GGUF 量化由 prithivMLmods 提供
+- 推理引擎为 llama.cpp（MIT）
+
+使用模型权重请遵守其各自的许可条款。

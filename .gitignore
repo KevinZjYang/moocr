@@ -1,0 +1,23 @@
+# 运行时资产（体积大，用 npm run fetch 重新拉取）
+resources/llama/
+resources/models/
+resources/.captures/
+
+# 产物与临时输出
+out/
+release/
+dist/
+build/
+.vite/
+*.log
+
+# 依赖
+node_modules/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# 编辑器
+.vscode/
+.idea/

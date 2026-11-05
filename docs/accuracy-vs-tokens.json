@@ -1,0 +1,42 @@
+[
+  {
+    "tag": "s50",
+    "tok": 630,
+    "chars": 3847,
+    "acc": 97.00633275762809,
+    "blocksCovered": 15,
+    "blocksTotal": 15
+  },
+  {
+    "tag": "s75",
+    "tok": 1372,
+    "chars": 3839,
+    "acc": 94.58837075417387,
+    "blocksCovered": 14,
+    "blocksTotal": 15
+  },
+  {
+    "tag": "s100",
+    "tok": 2366,
+    "chars": 3682,
+    "acc": 94.76108232584917,
+    "blocksCovered": 14,
+    "blocksTotal": 15
+  },
+  {
+    "tag": "s150",
+    "tok": 5194,
+    "chars": 3679,
+    "acc": 94.76108232584917,
+    "blocksCovered": 14,
+    "blocksTotal": 15
+  },
+  {
+    "tag": "s200",
+    "tok": 9142,
+    "chars": 3679,
+    "acc": 94.76108232584917,
+    "blocksCovered": 14,
+    "blocksTotal": 15
+  }
+]

@@ -1,0 +1,13 @@
+混合排版测试 Mixed Layout Test
+
+1. 引言 Introduction
+
+本文提出一种 In-Context Learning 方法，用于 few-shot 场景。
+
+2. 方法 Method
+
+We compute attention as softmax(QK^T/sqrt(d))V where d is the head dim.
+
+3. 结果 Results
+
+在 OmniDocBench 上达到 96.83 分，较 baseline 提升 4.2 个点。

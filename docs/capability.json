@@ -1,0 +1,162 @@
+{
+  "model": {
+    "id": "xiaomi-research/Xiaomi-OCR-0",
+    "params": 873438784,
+    "base": "Qwen/Qwen3.5-0.8B-Base",
+    "license": "Apache-2.0",
+    "runtime": {
+      "backend": "llama.cpp b12110 (win-vulkan-x64)",
+      "model_file": "resources/models/Xiaomi-OCR-0.Q4_K_M.gguf",
+      "mmproj_file": "resources/models/Xiaomi-OCR-0.mmproj-bf16.gguf",
+      "measured_vram_gb": 4.16
+    }
+  },
+
+  "prompts": {
+    "document": "Extract all information from the main body of the document image and represent it in markdown format, ignoring headers and footers. Tables should be expressed in OTSL format, formulas in the document should be represented using LATEX format, and the parsing should be organized according to the reading order.",
+    "text": "Extract the text in the image.",
+    "table": "Parse the table in the image into OTSL.",
+    "formula": "Identify the formula in the image and represent it using LATEX format.",
+    "kie": "Extract key information in the image"
+  },
+
+  "sampling": {
+    "temperature": 0,
+    "seed": 42,
+    "note": "temperature=0 下同 prompt 5 次两两一致率 100%，无需 GBNF 约束"
+  },
+
+  "measured_speed": {
+    "decode_tps": { "min": 153.2, "max": 166.0 },
+    "decode_tps_note": "9142 token 上下文时约 −7%",
+    "prefill_curve": [
+      { "image_tokens": 630, "prefill_s": 0.34, "megapixels": 0.59 },
+      { "image_tokens": 1372, "prefill_s": 0.82, "megapixels": 1.32 },
+      { "image_tokens": 2366, "prefill_s": 2.29, "megapixels": 2.35 },
+      { "image_tokens": 5194, "prefill_s": 8.02, "megapixels": 5.28 },
+      { "image_tokens": 9142, "prefill_s": 27.67, "megapixels": 9.38 }
+    ],
+    "tokens_per_megapixel": 950,
+    "prefill_scaling": "超线性，幂次约 1.8–2.2（接近平方），图像 token 数是唯一显著成本旋钮",
+    "throughput": {
+      "single_slot_pages_per_min_light": 77.7,
+      "four_slots_pages_per_min_light": 192.6,
+      "speedup": "1.4–2.5x",
+      "note": "轻页 0.77s/页；并发提升吞吐但抬高单页 p50 延迟"
+    }
+  },
+
+  "quality_presets": [
+    {
+      "id": "fast",
+      "label": "快速",
+      "image_max_tokens": 1280,
+      "approx_megapixels": 1.35,
+      "prefill_s": 0.8,
+      "page_total_s": 2,
+      "use_for": "批量纯文本扫描件"
+    },
+    {
+      "id": "standard",
+      "label": "标准",
+      "image_max_tokens": 2560,
+      "approx_megapixels": 2.7,
+      "prefill_s": 2.5,
+      "page_total_s": 6,
+      "use_for": "印刷文档、报告、报表",
+      "default": true
+    },
+    {
+      "id": "accurate",
+      "label": "高保真",
+      "image_max_tokens": 5120,
+      "approx_megapixels": 5.4,
+      "prefill_s": 8,
+      "page_total_s": 15,
+      "use_for": "手写、公式密集、小字号",
+      "requires_confirmation": false
+    },
+    {
+      "id": "extreme",
+      "label": "极限",
+      "image_max_tokens": 8192,
+      "approx_megapixels": 8.6,
+      "prefill_s": 22,
+      "page_total_s": 30,
+      "use_for": "单页抢救，交互上不可接受",
+      "requires_confirmation": true
+    }
+  ],
+
+  "server_defaults": {
+    "parallel": 4,
+    "ctx": 40960,
+    "ctx_per_slot": 10240,
+    "image_min_tokens": 1024,
+    "image_min_tokens_reason": "上游警告 Qwen-VL 低于 1024 image token 会损伤精度；实测小图细字会糊",
+    "ngl": 99,
+    "device": "Vulkan0",
+    "note": "单页最坏 10745 token（9.38MP dense 页），16384 ctx 够单页；4 槽并发需 40960"
+  },
+
+  "capability_grades": {
+    "A": [
+      { "feature": "印刷中文整页转 Markdown", "metric": "char_acc", "value": 1.0, "sample": "para-clean/blur2/noisy/lowcontrast" },
+      { "feature": "双栏版面与阅读顺序", "metric": "char_acc", "value": 1.0, "sample": "zh-two-col" },
+      { "feature": "中英混排", "metric": "char_acc", "value": 1.0, "sample": "mix-en-zh" },
+      { "feature": "日语", "metric": "char_acc", "value": 1.0, "sample": "ja-paragraph" },
+      { "feature": "俄语", "metric": "char_acc", "value": 1.0, "sample": "ru-paragraph" },
+      { "feature": "收据整页", "metric": "char_acc", "value": 1.0, "sample": "receipt.jpg" },
+      { "feature": "拉丁随机字母码", "metric": "char_acc", "value": 1.0, "sample": "nonce-table" },
+      { "feature": "表格 OTSL", "metric": "structural", "value": "exact", "sample": "table-simple" },
+      { "feature": "KIE JSON Schema", "metric": "keys_correct", "value": "6/6", "sample": "receipt-kie" },
+      { "feature": "模糊 4px 扫描", "metric": "char_acc", "value": 0.971 },
+      { "feature": "低对比度 25%", "metric": "char_acc", "value": 1.0 },
+      { "feature": "1/4 分辨率", "metric": "char_acc", "value": 0.986 },
+      { "feature": "椒盐噪声", "metric": "char_acc", "value": 1.0 },
+      { "feature": "输出确定性", "metric": "pairwise_agreement", "value": 1.0 }
+    ],
+    "B": [
+      { "feature": "公式转 LaTeX", "metric": "math_normalized_acc", "value": 0.948, "note": "15 段完整 14 段，1 条公式被跳过" },
+      { "feature": "手写公式", "metric": "char_acc", "value": 0.85, "math_normalized": 0.89, "block_weighted_sim": 0.799, "note": "2/19 段代数展开错；必须整页，不切分" },
+      { "feature": "手写 + 高 token 预算", "metric": "delta", "value": 0.104, "note": "4000→8230 token，74.6%→85.0%，prefill 12.5s→29.2s" },
+      { "feature": "繁体中文", "metric": "char_acc", "value": 0.857, "note": "输出规范化为简体，非识别错误" },
+      { "feature": "竖排中文", "metric": "char_acc", "value": 0.8, "note": "内容全对但自动补标点，不保真" },
+      { "feature": "表格合并单元格", "metric": "structural", "value": "lcel_ucel_correct", "note": "结构正确，个别格子值丢失" }
+    ],
+    "C": [
+      { "feature": "韩语", "metric": "char_acc", "value": 0.865, "semantically_broken": true,
+        "examples": ["주출 (추출)", "매리금 (머리글)", "바당将 (바닥글)", "마克다운 (마크다운)", "원기 (읽기)", "정화도 (정확도)", "체스트 (테스트)"],
+        "note": "增大分辨率与字号均无改善；字母/韵尾混淆 + 插入汉字" },
+      { "feature": "生僻字", "metric": "char_acc", "value": 0.658, "prompt": "document" },
+      { "feature": "印章/遮挡", "metric": "untested", "value": null }
+    ],
+    "D": [
+      { "feature": "字符级 bbox", "metric": "available", "value": false, "evidence": "probe 输出仅有 text 字段，无任何坐标" },
+      { "feature": "置信度分数", "metric": "available", "value": false }
+    ]
+  },
+
+  "degeneration": {
+    "detector": "多尺度连续重复 run：同一 1–32 gram 连续重复 >= 4 次",
+    "observed": [
+      { "input": "正常文档 / 退化扫描 / 密集公式 / 手写", "ratio": 0.0 },
+      { "input": "生僻字 + document prompt", "ratio": 0.0 },
+      { "input": "生僻字 + text prompt", "ratio": 0.559, "detail": "尾部单字符连续重复 81 次" }
+    ],
+    "policy": "P1 守卫：检测到退化 → 换 document prompt 重试一次 → 仍失败则截断并标记该页可疑",
+    "note": "原计划的 P0 强约束属过度设计；正常输入退化率 0%"
+  },
+
+  "metric_caveats": {
+    "latex_char_acc_misleading": "原始字符比对会把 \\frac{}{} 与 \\frac{}{^{}} 、直引号与弯引号全部算错，dense 页从 79.1% 抬到 math-normalized 94.8%",
+    "ngram_frequency_false_positive": "24-gram 出现频率法把公式中合法重复的 \\boldsymbol{k}_{[t]}^{i^\\top}（出现 7 次）判为退化，必须改成连续 run 检测",
+    "benchmark_leakage": "官方 fixtures 取自 arXiv 论文页，可能在预训练语料中；绝对准确率视为上界，验收需用用户真实文档",
+    "korean_char_acc_understates": "韩语替换后仍是韩文字符，字符准确率 86% 掩盖了语义完全错误"
+  },
+
+  "known_omissions": [
+    { "case": "密集公式页 15 段", "lost": "1 段（Eq.5 整条公式被跳过）", "mitigation": "整页识别后按栏二次校验，或提示用户复核" },
+    { "case": "合并单元格表第 2 行末列", "lost": "值 100 被误标为 <ucel>", "mitigation": "表格编辑器允许手工修正格子" }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "name": "moocr",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "本地运行的 OCR 桌面工具：图像 / PDF → Markdown，表格转 HTML、公式转 Word 公式，基于 Xiaomi-OCR-0 与 llama.cpp Vulkan 后端。",
+  "scripts": {
+    "ocr": "node packages/cli/src/main.ts",
+    "test": "node packages/postprocess/test/run.ts && node packages/core/test/run.ts && node packages/exporters/test/run.ts",
+    "regress": "node scripts/m1-regress.mjs out",
+    "bench:m0": "node scripts/m0-bench.mjs",
+    "build:main": "node scripts/build-main.mjs",
+    "dev:renderer": "vite",
+    "build:renderer": "vite build",
+    "dev": "node scripts/build-main.mjs && node scripts/dev-desktop.mjs",
+    "start": "node scripts/build-main.mjs && node scripts/build-renderer.mjs && node scripts/start-desktop.mjs",
+    "fetch": "node scripts/fetch.mjs",
+    "pack": "npm run build:main && npm run build:renderer && electron-builder --dir"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^34.0.0",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.24.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7"
+  },
+  "dependencies": {
+    "docx": "^9.15.2",
+    "mathml2omml": "^0.5.0",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "temml": "^0.14.0"
+  },
+  "allowScripts": {
+    "electron@34.5.8": true,
+    "esbuild@0.24.2": true,
+    "esbuild@0.25.12": true
+  },
+  "main": "apps/desktop/dist/main.cjs",
+  "build": {
+    "appId": "app.moocr.desktop",
+    "productName": "moocr",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "apps/desktop/dist/**/*",
+      "dist/renderer/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/models",
+        "to": "resources/models"
+      },
+      {
+        "from": "resources/llama/bin",
+        "to": "resources/llama/bin"
+      }
+    ],
+    "win": {
+      "target": [
+        "dir"
+      ]
+    },
+    "asar": true,
+    "npmRebuild": false
+  },
+  "license": "MIT",
+  "keywords": [
+    "ocr",
+    "document-parsing",
+    "llama.cpp",
+    "vulkan",
+    "electron",
+    "markdown",
+    "otsl",
+    "latex",
+    "xiaomi-ocr"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KevinZjYang/moocr.git"
+  },
+  "homepage": "https://github.com/KevinZjYang/moocr#readme",
+  "bugs": {
+    "url": "https://github.com/KevinZjYang/moocr/issues"
+  },
+  "author": "KevinZjYang"
+}

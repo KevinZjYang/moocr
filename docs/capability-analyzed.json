@@ -1,0 +1,87 @@
+[
+  {
+    "name": "qianziwen",
+    "outPath": "docs/hi-qianziwen.txt",
+    "chars": 30,
+    "accPlain": 0.8571428571428572,
+    "accMath": 0.8461538461538461,
+    "refChars": 31,
+    "coverage": {
+      "refBlocks": 3,
+      "outBlocks": 3,
+      "weightedSim": 0.8461538461538461
+    },
+    "missingBlocks": [],
+    "repeatRunRatio": 0,
+    "repeatRuns": []
+  },
+  {
+    "name": "dense-equations",
+    "outPath": "docs/hi-dense-equations.txt",
+    "chars": 3682,
+    "accPlain": 0.7908040967531053,
+    "accMath": 0.9476108232584917,
+    "refChars": 4604,
+    "coverage": {
+      "refBlocks": 15,
+      "outBlocks": 14,
+      "weightedSim": 0.9641767190919734
+    },
+    "missingBlocks": [
+      {
+        "i": 7,
+        "sim": 0.5847457627118644,
+        "outIndex": 6,
+        "refChars": 375,
+        "head": "[ o _ [ t ] ^ r = S _ [ t ] ^ r q _ [ t ] ^ r = S _ [ t ] ^ "
+      }
+    ],
+    "repeatRunRatio": 0,
+    "repeatRuns": []
+  },
+  {
+    "name": "handwrite",
+    "outPath": "docs/hi-handwrite.txt",
+    "chars": 1928,
+    "accPlain": 0.8499765588373183,
+    "accMath": 0.8895522388059701,
+    "refChars": 2152,
+    "coverage": {
+      "refBlocks": 19,
+      "outBlocks": 22,
+      "weightedSim": 0.7989415530937043
+    },
+    "missingBlocks": [
+      {
+        "i": 9,
+        "sim": 0.33333333333333337,
+        "outIndex": 13,
+        "refChars": 342,
+        "head": "[ arrayr l [(aa)^2]^ & = 2(aa)(aa)^ & = 2aa(aa + (-aa^2)a) &"
+      },
+      {
+        "i": 17,
+        "sim": 0.41025641025641024,
+        "outIndex": 19,
+        "refChars": 125,
+        "head": "[ arrayl (-1)a(1 + 3w) = a + 2a -(3 + 3w)a = a array ]"
+      }
+    ],
+    "repeatRunRatio": 0,
+    "repeatRuns": []
+  },
+  {
+    "name": "ko",
+    "outPath": "docs/hi-ko.txt",
+    "chars": 131,
+    "repeatRunRatio": 0,
+    "repeatRuns": []
+  },
+  {
+    "name": "ja",
+    "outPath": "docs/hi-ja.txt",
+    "chars": 132,
+    "repeatRunRatio": 0,
+    "repeatRuns": []
+  }
+]

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    />
+    <title>墨客 · 截取区域</title>
+    <link rel="stylesheet" href="/src/overlay.css" />
+  </head>
+  <body>
+    <img id="shot" alt="" />
+    <div id="shade"></div>
+    <div id="box">
+      <div id="size"></div>
+    </div>
+    <div id="hint">拖动框选区域 · Esc 取消</div>
+    <script type="module" src="/src/overlay.ts"></script>
+  </body>
+</html>

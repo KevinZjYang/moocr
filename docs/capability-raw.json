@@ -1,0 +1,485 @@
+{
+  "generated_at": "2026-11-04T16:47:52.390Z",
+  "server": "http://127.0.0.1:8090",
+  "total_wall_seconds": 132.5,
+  "cases": 13,
+  "failed": 0,
+  "page_cases": [
+    {
+      "id": "doc-qianziwen",
+      "seconds": 7.24,
+      "prefill_ms": 7027.418,
+      "decode_ms": 176.797,
+      "decode_tps": 141.4,
+      "prompt_tokens": 566,
+      "output_tokens": 26,
+      "finish": "stop",
+      "accuracy": 0.8571,
+      "repeat": 0
+    },
+    {
+      "id": "doc-dense-equations",
+      "seconds": 12.51,
+      "prefill_ms": 2328.695,
+      "decode_ms": 10073.066,
+      "decode_tps": 160,
+      "prompt_tokens": 2316,
+      "output_tokens": 1613,
+      "finish": "stop",
+      "accuracy": 0.7908,
+      "repeat": 0.1125
+    },
+    {
+      "id": "doc-handwrite-formula",
+      "seconds": 12.49,
+      "prefill_ms": 6266.529,
+      "decode_ms": 5985.576,
+      "decode_tps": 159.2,
+      "prompt_tokens": 4100,
+      "output_tokens": 954,
+      "finish": "stop",
+      "accuracy": 0.7459,
+      "repeat": 0.1772
+    },
+    {
+      "id": "doc-receipt",
+      "seconds": 3.31,
+      "prefill_ms": 1413.803,
+      "decode_ms": 1817.173,
+      "decode_tps": 164.5,
+      "prompt_tokens": 1499,
+      "output_tokens": 300,
+      "finish": "stop",
+      "accuracy": 1,
+      "repeat": 0
+    }
+  ],
+  "context_headroom": [
+    {
+      "id": "doc-qianziwen",
+      "used": 592,
+      "ratio_of_16384": 0.036,
+      "truncated": false
+    },
+    {
+      "id": "doc-dense-equations",
+      "used": 3929,
+      "ratio_of_16384": 0.24,
+      "truncated": false
+    },
+    {
+      "id": "doc-handwrite-formula",
+      "used": 5054,
+      "ratio_of_16384": 0.308,
+      "truncated": false
+    },
+    {
+      "id": "doc-receipt",
+      "used": 1799,
+      "ratio_of_16384": 0.11,
+      "truncated": false
+    },
+    {
+      "id": "task-table",
+      "used": 449,
+      "ratio_of_16384": 0.027,
+      "truncated": false
+    },
+    {
+      "id": "task-formula",
+      "used": 587,
+      "ratio_of_16384": 0.036,
+      "truncated": false
+    },
+    {
+      "id": "task-text",
+      "used": 539,
+      "ratio_of_16384": 0.033,
+      "truncated": false
+    },
+    {
+      "id": "lang-ja",
+      "used": 505,
+      "ratio_of_16384": 0.031,
+      "truncated": false
+    },
+    {
+      "id": "lang-ko",
+      "used": 536,
+      "ratio_of_16384": 0.033,
+      "truncated": false
+    },
+    {
+      "id": "lang-ru",
+      "used": 651,
+      "ratio_of_16384": 0.04,
+      "truncated": false
+    },
+    {
+      "id": "lang-zh-vertical",
+      "used": 522,
+      "ratio_of_16384": 0.032,
+      "truncated": false
+    },
+    {
+      "id": "kie-receipt",
+      "used": 1704,
+      "ratio_of_16384": 0.104,
+      "truncated": false
+    },
+    {
+      "id": "probe-bbox",
+      "used": 584,
+      "ratio_of_16384": 0.036,
+      "truncated": false
+    }
+  ],
+  "repetition": {
+    "max_ratio": 0.1772,
+    "hits": [
+      "doc-dense-equations",
+      "doc-handwrite-formula"
+    ]
+  },
+  "languages": [
+    {
+      "id": "lang-ja",
+      "script_ratio": 0.8561,
+      "accuracy": null
+    },
+    {
+      "id": "lang-ko",
+      "script_ratio": 0.8374,
+      "accuracy": null
+    },
+    {
+      "id": "lang-ru",
+      "script_ratio": 0.9098,
+      "accuracy": null
+    },
+    {
+      "id": "lang-zh-vertical",
+      "accuracy": 0.8
+    }
+  ],
+  "adherence": {
+    "runs": 5,
+    "pairwise_accuracy": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "mean": 1,
+    "min": 1,
+    "repeat_stress": {
+      "runs": 8,
+      "ratios": [
+        0.1125,
+        0.1125,
+        0.1125,
+        0.1125,
+        0.1125,
+        0.1125,
+        0.1125,
+        0.1125
+      ],
+      "max_ratio": 0.11249619945272119,
+      "hit_rate": 1
+    }
+  },
+  "results": [
+    {
+      "id": "doc-qianziwen",
+      "group": "A-page",
+      "prompt": "document",
+      "image": "fixtures/qianziwen.jpeg",
+      "max_tokens": 2048,
+      "ok": true,
+      "wall_seconds": 7.244,
+      "finish_reason": "stop",
+      "prompt_tokens": 566,
+      "output_tokens": 26,
+      "prefill_ms": 7027.418,
+      "decode_ms": 176.797,
+      "prefill_tps": 80.5416726313989,
+      "decode_tps": 141.40511434017546,
+      "repeat_ratio": 0,
+      "output_chars": 30,
+      "text": "行书千文\n\n梁员外散骑侍郎周兴嗣次韵\n\n天地玄黄宇宙洪荒日月",
+      "error": null,
+      "ref_accuracy": 0.8571
+    },
+    {
+      "id": "doc-dense-equations",
+      "group": "A-page",
+      "prompt": "document",
+      "image": "fixtures/dense-equations.jpg",
+      "max_tokens": 4096,
+      "ok": true,
+      "wall_seconds": 12.505,
+      "finish_reason": "stop",
+      "prompt_tokens": 2316,
+      "output_tokens": 1613,
+      "prefill_ms": 2328.695,
+      "decode_ms": 10073.066,
+      "prefill_tps": 994.5484488093116,
+      "decode_tps": 160.0307195445756,
+      "repeat_ratio": 0.1125,
+      "output_chars": 3682,
+      "text": "We then define the following variables: \\(\\mathbf{P}_i^j = \\prod_{t=i}^j (\\mathbf{I} - \\beta_t \\boldsymbol{k}_t \\boldsymbol{k}_t^\\top) \\in \\mathbb{R}^{d \\times d}\\), \\(\\mathbf{H}_i^j = \\sum_{t=i}^j \\beta_t (\\boldsymbol{v}_t \\boldsymbol{k}_t^\\top) \\mathbf{P}_{t+1}^j \\in \\mathbb{R}^{d \\times d}\\), where we let \\(\\mathbf{P}_i^j = \\mathbf{I}\\) whenever \\(i > j\\). Intuitively, \\(\\mathbf{P}_i^j\\) is the “decay factor” to be applied to \\(\\mathbf{S}_i\\) for obtaining \\(\\mathbf{S}_j\\), and \\(\\mathbf{H}_i^j\\) represents the contributions to \\(\\mathbf{S}_j\\) starting from token \\(i\\). (Hence \\(\\mathbf{S}_t = \\mathbf{H}_1^t\\)). The chunkwise recurrence can then be written as,\n\n\\[\\mathbf{S}_{[t]}^r = \\mathbf{S}_{[t]}^0 \\mathbf{P}_{[t]}^r + \\mathbf{H}_{[t]}^r \\tag{5}\\]\n\nwhere we define the chunkwise variables \\(\\mathbf{S}_{[t]}^i = \\mathbf{S}_{tC+i}\\), \\(\\mathbf{P}_{[t]}^r = \\mathbf{P}_{tC+1}^{tC+r}\\), \\(\\mathbf{H}_{[t]}^r = \\mathbf{H}_{tC+1}^{tC+r}\\). Here we have \\(\\frac{L}{C}\\) chunks of size \\(C\\). The trick is to now efficiently represent the \\(\\mathbf{P}_{[t]}^r, \\mathbf{H}_{[t]}^r \\in \\mathbb{R}^{d \\times d}\\) matrices using a similar approach described in §3.1, so that these matrices can be stored in \\(\\mathcal{O}(d)\\) memory,\n\n\\[\\mathbf{P}_{[t]}^r = \\mathbf{I} - \\sum_{i=1}^r \\boldsymbol{w}_{[t]}^i \\boldsymbol{k}_{[t]}^{i^\\top}, \\quad \\mathbf{H}_{[t]}^r = \\sum_{i=1}^r \\boldsymbol{u}_{[t]}^i \\boldsymbol{k}_{[t]}^{i^\\top} \\quad \\in \\mathbb{R}^{d \\times d} \\tag{6}\\]\n\n\\[\\boldsymbol{w}_{[t]}^r = \\beta_{[t]}^r \\left( \\boldsymbol{k}_{[t]}^r - \\sum_{i=1}^{r-1} \\boldsymbol{w}_{[t]}^i (\\boldsymbol{k}_{[t]}^{i^\\top} \\boldsymbol{k}_{[t]}^r) \\right), \\quad \\boldsymbol{u}_{[t]}^r = \\beta_{[t]}^r \\left( \\boldsymbol{v}_{[t]}^r - \\sum_{i=1}^{r-1} \\boldsymbol{u}_{[t]}^i (\\boldsymbol{k}_{[t]}^{i^\\top} \\boldsymbol{k}_{[t]}^r) \\right) \\quad \\in \\mathbb{R}^d \\tag{7}\\]\n\nThe derivations for the above can be found in the appendix. Subsequently, based on Eq. 5, we can obtain the chunk-level recurrence for hidden states and outputs as,\n\n\\[\\mathbf{S}_{[t]}^r = \\mathbf{S}_{[t]}^0 - \\left( \\mathbf{S}_{[t]}^0 \\sum_{i=1}^r \\boldsymbol{w}_{[t]}^i \\boldsymbol{k}_{[t]}^{i^\\top} \\right) + \\sum_{i=1}^r \\boldsymbol{u}_{[t]}^i \\boldsymbol{k}_{[t]}^{i^\\top} = \\mathbf{S}_{[t]}^0 + \\sum_{i=1}^r \\left( \\boldsymbol{u}_{[t]}^i - \\mathbf{S}_{[t]}^0 \\boldsymbol{w}_{[t]}^i \\right) \\boldsymbol{k}_{[t]}^{i^\\top},\\]\n\nLetting \\(\\mathbf{S}_{[t]} = \\mathbf{S}_{[t]}^0\\), the above can be simplified to matrix notations similarly to Eq.1-2,\n\n\\[\\mathbf{S}_{[t+1]} = \\mathbf{S}_{[t]} + \\left( \\mathbf{U}_{[t]} - \\mathbf{W}_{[t]} \\mathbf{S}_{[t]}^{\\top} \\right)^{\\top} \\mathbf{K}_{[t]}, \\tag{8}\\]\n\n\\[\\mathbf{O}_{[t]} = \\mathbf{Q}_{[t]} \\mathbf{S}_{[t]}^{\\top} + (\\mathbf{Q}_{[t]} \\mathbf{K}_{[t]}^{\\top} \\odot \\mathbf{M}) \\left( \\mathbf{U}_{[t]} - \\mathbf{W}_{[t]} \\mathbf{S}_{[t]}^{\\top} \\right) \\tag{9}\\]\n\nwhere \\(\\Box_{[t]} = \\Box_{[t]}^{1:C} \\in \\mathbb{R}^{C \\times d}\\) for \\(\\Box \\in \\{\\mathbf{Q}, \\mathbf{K}, \\mathbf{V}, \\mathbf{O}, \\mathbf{U}, \\mathbf{W}\\}\\) defines the chunkwise matrices that are formed from stacking the \\(q_t, k_t, v_t, o_t, u_t, w_t\\) vectors.\n\nPractical considerations. In the above, Eq. 7 is fully recurrent and thus cannot use tensor cores written as is. To solve this, we further leverage the UT transform [44, 23] (see §B.2 for derivations):\n\n\\[\\mathbf{T}_{[t]} = \\left( \\mathbf{I} + \\operatorname{tril}(\\operatorname{diag}(\\beta_{[t]}) \\mathbf{K}_{[t]} \\mathbf{K}_{[t]}^{\\top}, -1) \\right)^{-1} \\operatorname{diag}(\\beta_{[t]}) \\tag{10}\\]\n\n\\[\\mathbf{W}_{[t]} = \\mathbf{T}_{[t]} \\mathbf{K}_{[t]}, \\quad \\mathbf{U}_{[t]} = \\mathbf{T}_{[t]} \\mathbf{V}_{[t]} \\tag{11}\\]",
+      "error": null,
+      "ref_accuracy": 0.7908
+    },
+    {
+      "id": "doc-handwrite-formula",
+      "group": "A-page",
+      "prompt": "document",
+      "image": "fixtures/handwrite-formula.jpg",
+      "max_tokens": 4096,
+      "ok": true,
+      "wall_seconds": 12.487,
+      "finish_reason": "stop",
+      "prompt_tokens": 4100,
+      "output_tokens": 954,
+      "prefill_ms": 6266.529,
+      "decode_ms": 5985.576,
+      "prefill_tps": 654.269692201217,
+      "decode_tps": 159.21608881083458,
+      "repeat_ratio": 0.1772,
+      "output_chars": 1770,
+      "text": "(b) we got Friedmann equation:\n\n\\[\\left(\\frac{\\dot{a}}{a}\\right)^2 = \\frac{8\\pi G}{3c^2} p - \\frac{k c^2}{a^2}\\]\n\nand Raychaudhuri equation:\n\n\\[2 \\frac{\\ddot{a}}{a} + \\left(\\frac{\\dot{a}}{a}\\right)^2 + \\left(\\frac{k c^2}{a^2}\\right) = -\\frac{8\\pi G}{c^2} p\\]\n\nSubstituting the Friedmann equation and \\(P = w p\\) into the Raychaudhuri equation:\n\n\\[2 \\frac{\\ddot{a}}{a} + \\frac{8\\pi G}{3c^2} p - \\frac{k c^2}{a^2} + \\frac{k c^2}{a^2} = -\\frac{8\\pi G}{c^2} p\\]\n\n\\[\\frac{\\ddot{a}}{a} + \\frac{4\\pi G}{3c^2} p = -\\frac{4\\pi G}{c^2} p\\]\n\n\\[\\frac{\\ddot{a}}{a} = -\\frac{4\\pi G}{3c^2} (p + 3p) = -\\frac{4\\pi G}{3c^2} (1 + 3w)p\\]\n\nDifferentiating the Friedmann equation with respect to time, we get:\n\n\\[\\left[\\left(\\frac{\\dot{a}}{a}\\right)^2\\right]' = \\frac{8\\pi G}{3c^2} \\dot{p} - k c^2 \\left(\\frac{1}{a^2}\\right)\\]\n\n\\[= 2 \\frac{\\dot{a}}{a} \\left(\\frac{\\ddot{a}}{a} + (-\\frac{\\dot{a}}{a}) \\dot{a}\\right)\\]\n\n\\[= \\frac{2\\dot{a}\\ddot{a}}{a^2} + (2)\\frac{\\dot{a}^3}{a^3}\\]\n\n\\[2\\frac{\\dot{a}\\ddot{a}}{a^2} + \\frac{\\dot{a}^3}{a^3} (-2) = \\frac{8\\pi G}{3c^2} \\dot{p} + \\frac{2k c^2}{a^3} \\dot{a}\\]\n\n\\[\\frac{\\ddot{a}\\ddot{a}}{a^2} - \\frac{\\dot{a}^3}{a^3} = \\frac{4\\pi G}{3c^2} \\dot{p} + \\frac{k c^2}{a^3} \\dot{a}\\]\n\nSubstituting \\(\\frac{\\ddot{a}}{a} = -\\frac{4\\pi G}{3c^2} (1 + 3w)p\\)\n\n\\[\\frac{\\dot{a}}{a} \\left(-\\frac{4\\pi G}{3c}\\right) (1 + 3w)p = \\frac{4\\pi G}{3c^2} \\dot{p} + \\frac{\\dot{a}}{a} \\left(\\frac{k c^2}{a^2} + \\frac{\\dot{a}^2}{a^2}\\right)\\]\n\nand Friedmann equation into it:\n\n\\[\\frac{\\dot{a}}{a} \\left(-\\frac{4\\pi G}{3c}\\right) (1 + 3w)p = \\frac{4\\pi G}{3c^2} \\dot{p} + \\frac{\\dot{a}}{a} \\frac{4\\pi G}{3c} \\cdot 2 \\cdot p\\]\n\n\\[(-1)\\dot{a}(1 + 3w)p = a\\dot{p} + 2p\\dot{a}\\]\n\n\\[-(3 + 3w)p\\dot{a} = a\\dot{p}\\]\n\n\\[\\therefore \\quad \\frac{\\dot{p}}{p} = -3(1 + w)\\frac{\\dot{a}}{a}\\]",
+      "error": null,
+      "ref_accuracy": 0.7459
+    },
+    {
+      "id": "doc-receipt",
+      "group": "A-page",
+      "prompt": "document",
+      "image": "fixtures/receipt.jpg",
+      "max_tokens": 2048,
+      "ok": true,
+      "wall_seconds": 3.312,
+      "finish_reason": "stop",
+      "prompt_tokens": 1499,
+      "output_tokens": 300,
+      "prefill_ms": 1413.803,
+      "decode_ms": 1817.173,
+      "prefill_tps": 1060.2608708568307,
+      "decode_tps": 164.5412957379402,
+      "repeat_ratio": 0,
+      "output_chars": 530,
+      "text": "MR. D.I.Y. SDN BHD\n\n(CO.REG :704427-T )\n\nLOT 1851-A & 1851-B, JALAN KPB 6,\n\nKAWASAN PERINDUSTRIAN BALAKONG,\n\n43300 SERI KEMBANGAN, SELANGOR\n\n(GST ID No :001092886528)\n\n(CHERAS LEISURE MALL)\n\n-TAX INVOICE-\n\nCLOTH PEG E-140 *S\n\nWA36 - 6/60\n\n9555112901406 1 X 5.90 5.90\n\nItem(s) : 1 Qty(s) : 1\n\nTotal Incl. GST@6% RM 5.90\n\nCASH RM 5.90\n\nGST Summary Amt(RM) Tax(RM)\n\nGST S@6% 5.57 0.33\n\n*\n\n18-10-17 15:16 SH01 ZT09 T3 R000000163\n\nOPERATOR GCHT - NOR MASLIZA\n\nEXCHANGE ARE ALLOWED WITHIN\n\n7 DAYS WITH RECEIPT.\n\nSTRICTLY NO CASH REFUND.",
+      "error": null,
+      "ref_accuracy": 1
+    },
+    {
+      "id": "task-table",
+      "group": "B-task",
+      "prompt": "table",
+      "image": "fixtures/synth/table-simple.png",
+      "max_tokens": 768,
+      "ok": true,
+      "wall_seconds": 1.052,
+      "finish_reason": "stop",
+      "prompt_tokens": 308,
+      "output_tokens": 141,
+      "prefill_ms": 175.882,
+      "decode_ms": 843.175,
+      "prefill_tps": 1751.174082623577,
+      "decode_tps": 166.03907848311442,
+      "repeat_ratio": 0,
+      "output_chars": 215,
+      "text": "<fcel>项目<fcel>数量<fcel>单价<fcel>金额<nl><fcel>笔记本电脑<fcel>2<fcel>5999.00<fcel>11998.00<nl><fcel>显示器<fcel>3<fcel>1499.00<fcel>4497.00<nl><fcel>机械键盘<fcel>5<fcel>399.00<fcel>1995.00<nl><fcel>合计<ecel><ecel><fcel>18490.00<nl>",
+      "error": null,
+      "expect_tokens": {
+        "<fcel>": true,
+        "<nl>": true
+      }
+    },
+    {
+      "id": "task-formula",
+      "group": "B-task",
+      "prompt": "formula",
+      "image": "fixtures/synth/formula-simple.png",
+      "max_tokens": 384,
+      "ok": true,
+      "wall_seconds": 1.023,
+      "finish_reason": "stop",
+      "prompt_tokens": 462,
+      "output_tokens": 125,
+      "prefill_ms": 247.798,
+      "decode_ms": 746.734,
+      "prefill_tps": 1864.4218274562343,
+      "decode_tps": 166.056453837645,
+      "repeat_ratio": 0,
+      "output_chars": 237,
+      "text": "\\[\\begin{array}{l} E = m c ^ {2} \\\\ \\int_ {-} ^ {\\infty} e ^ {- x ^ {2}} d x = \\sqrt {\\pi} / 2 \\\\ f (x) = (1 / \\sqrt {(2 \\pi \\sigma^ {2})}) \\exp (- (x - \\mu) ^ {2} / (2 \\sigma^ {2})) \\\\ \\sum_ {i = 1} ^ {n} i = n (n + 1) / 2 \\end{array}\\]",
+      "error": null,
+      "expect_tokens": {
+        "\\": true,
+        "^": true
+      }
+    },
+    {
+      "id": "task-text",
+      "group": "B-task",
+      "prompt": "text",
+      "image": "fixtures/qianziwen.jpeg",
+      "max_tokens": 512,
+      "ok": true,
+      "wall_seconds": 0.442,
+      "finish_reason": "stop",
+      "prompt_tokens": 515,
+      "output_tokens": 24,
+      "prefill_ms": 259.98,
+      "decode_ms": 140.096,
+      "prefill_tps": 1980.9216093545656,
+      "decode_tps": 164.17313841936956,
+      "repeat_ratio": 0,
+      "output_chars": 26,
+      "text": "行书千文梁员外散骑侍郎周兴嗣次韵天地玄黄宇宙洪荒日月",
+      "error": null
+    },
+    {
+      "id": "lang-ja",
+      "group": "C-lang",
+      "prompt": "text",
+      "image": "fixtures/synth/ja-paragraph.png",
+      "max_tokens": 512,
+      "ok": true,
+      "wall_seconds": 0.724,
+      "finish_reason": "stop",
+      "prompt_tokens": 427,
+      "output_tokens": 78,
+      "prefill_ms": 228.275,
+      "decode_ms": 467.517,
+      "prefill_tps": 1870.5508706603875,
+      "decode_tps": 164.69989326591335,
+      "repeat_ratio": 0,
+      "output_chars": 132,
+      "text": "文書画像から本文の情報をすべて抽出し、ヘッダーとフッターを無視して、マークダウン形式で表現してください。表はOTSL形式で表現し、数式はLaTeX形式で表現してください。読み順に従って解析を整理してください。これは日本語のOCR精度を確認するためのテスト文書です。",
+      "error": null,
+      "script_ratio": 0.8561
+    },
+    {
+      "id": "lang-ko",
+      "group": "C-lang",
+      "prompt": "text",
+      "image": "fixtures/synth/ko-paragraph.png",
+      "max_tokens": 512,
+      "ok": true,
+      "wall_seconds": 0.912,
+      "finish_reason": "stop",
+      "prompt_tokens": 427,
+      "output_tokens": 109,
+      "prefill_ms": 225.754,
+      "decode_ms": 656.193,
+      "prefill_tps": 1891.4393543414515,
+      "decode_tps": 164.58572401717177,
+      "repeat_ratio": 0,
+      "output_chars": 132,
+      "text": "문서 이미지에서 본문의 모든정보를주출하고마리类과바당类을무시한체마克다은형식으로표현하실시오.표는 OTSL형식으로,수식은 LaTeX형식으로표현하실시오.원기순서에 따라구문분식을구성하실시오.이 것을한국어 OCR정화도를화인하기 위한트스트문서입니다.",
+      "error": null,
+      "script_ratio": 0.8374
+    },
+    {
+      "id": "lang-ru",
+      "group": "C-lang",
+      "prompt": "text",
+      "image": "fixtures/synth/ru-paragraph.png",
+      "max_tokens": 512,
+      "ok": true,
+      "wall_seconds": 1.233,
+      "finish_reason": "stop",
+      "prompt_tokens": 495,
+      "output_tokens": 156,
+      "prefill_ms": 265.144,
+      "decode_ms": 936.991,
+      "prefill_tps": 1866.9100564221706,
+      "decode_tps": 165.42314707398472,
+      "repeat_ratio": 0,
+      "output_chars": 310,
+      "text": "Извлеките всю информацию из основного текста документа и представьте её в формате Markdown, игнорируя колонтиту лы. Таблицы следует выражать в формате OTSL, формулы — в формате LaTeX, а разбор должен быть организован в по рядке чтения. Это тестовый документ для проверки точности распознавания русского текста.",
+      "error": null,
+      "script_ratio": 0.9098
+    },
+    {
+      "id": "lang-zh-vertical",
+      "group": "C-lang",
+      "prompt": "text",
+      "image": "fixtures/synth/zh-vertical.png",
+      "max_tokens": 256,
+      "ok": true,
+      "wall_seconds": 0.409,
+      "finish_reason": "stop",
+      "prompt_tokens": 503,
+      "output_tokens": 19,
+      "prefill_ms": 269.543,
+      "decode_ms": 111.051,
+      "prefill_tps": 1866.1215464693946,
+      "decode_tps": 162.08768943998703,
+      "repeat_ratio": 0,
+      "output_chars": 24,
+      "text": "白日依山尽，黄河入海流。欲穷千里目，更上一层楼。",
+      "error": null,
+      "ref_accuracy": 0.8
+    },
+    {
+      "id": "kie-receipt",
+      "group": "D-probe",
+      "prompt": "receipts",
+      "image": "fixtures/receipt.jpg",
+      "max_tokens": 512,
+      "ok": true,
+      "wall_seconds": 1.956,
+      "finish_reason": "stop",
+      "prompt_tokens": 1559,
+      "output_tokens": 145,
+      "prefill_ms": 1009.531,
+      "decode_ms": 873.823,
+      "prefill_tps": 1544.281453467006,
+      "decode_tps": 164.79309883122784,
+      "repeat_ratio": 0,
+      "output_chars": 269,
+      "text": "{\n  \"date\": \"2017-10-18\",\n  \"seller_address\": \"LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR\",\n  \"seller_gst_id\": \"001092886528\",\n  \"seller_name\": \"MR. D.I.Y. SDN BHD\",\n  \"total_amount\": \"5.90\",\n  \"total_tax\": \"0.33\"\n}",
+      "error": null,
+      "json_valid": true,
+      "json_keys": [
+        "date",
+        "seller_address",
+        "seller_gst_id",
+        "seller_name",
+        "total_amount",
+        "total_tax"
+      ]
+    },
+    {
+      "id": "probe-bbox",
+      "group": "D-probe",
+      "prompt": "bbox",
+      "image": "fixtures/qianziwen.jpeg",
+      "max_tokens": 1024,
+      "ok": true,
+      "wall_seconds": 0.587,
+      "finish_reason": "stop",
+      "prompt_tokens": 543,
+      "output_tokens": 41,
+      "prefill_ms": 301.271,
+      "decode_ms": 242.401,
+      "prefill_tps": 1802.3639845853068,
+      "decode_tps": 165.015820891828,
+      "repeat_ratio": 0,
+      "output_chars": 68,
+      "text": "[{\"text\": \"行书千文\"}, {\"text\": \"梁员外散骑侍郎周兴嗣次韵\"}, {\"text\": \"天地玄黄宇宙洪荒日月\"}]",
+      "error": null,
+      "bbox": {
+        "valid": false,
+        "items": 3,
+        "with_bbox": 0,
+        "monotonic": 0,
+        "sample": null
+      }
+    }
+  ]
+}

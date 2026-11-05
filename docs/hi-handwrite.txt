@@ -1,0 +1,43 @@
+(b) we got Friedmann equation:
+
+\[\left(\frac{\dot{a}}{a}\right)^{2} = \frac{8\pi G}{3c^{2}}P - \frac{kc^{2}}{a^{2}}\]
+
+and Raychaudhuri equation:
+
+\[2\frac{\ddot{a}}{a} + \left(\frac{\dot{a}}{a}\right)^{2} + \left(\frac{kc^{2}}{a^{2}}\right) = -\frac{8\pi G}{c^{2}}.\]
+
+Substituting the Friedmann equation and \(P = wp\) into the Raychaudhuri equation:
+
+\[2\frac{\ddot{a}}{a} + \frac{8\pi G}{3c^{2}}P - \frac{kc^{2}}{a^{2}} + \frac{kc^{2}}{a^{2}} = -\frac{8\pi G}{c^{2}}P\]
+
+\[\frac{\ddot{a}}{a} + \frac{4\pi G}{3c^{2}}P = -\frac{4\pi G}{c^{2}}P\]
+
+\[\frac{\ddot{a}}{a} = -\frac{4\pi G}{3c^{2}}(p + 3p) = -\frac{4\pi G}{3c^{2}}(1 + 3w)p\]
+
+Differentiating the Friedmann equation with respect to time, we get:
+
+\[\left[\frac{\dot{a}^{3}}{a^{3}}\right] = 2\left(\frac{\dot{a}}{a}\right)\left(\frac{\dot{a}}{a}\right)^{\prime}\]
+
+\[= 2\frac{\dot{a}}{a}\left(\frac{\ddot{a}}{a} + (-\frac{\dot{a}}{a})\dot{a}\right)\]
+
+\[= \frac{2\dot{a}\ddot{a}}{a^{2}} + (-2)\frac{\dot{a}^{3}}{a^{3}}\]
+
+\[\left[\left(\frac{\dot{a}}{a}\right)^{2}\right]^{\prime} = \frac{8\pi G}{3c^{2}}\dot{p} - k c^{2}\left(\frac{1}{a^{2}}\right)^{\prime}\]
+
+\[2\frac{\dot{a}\ddot{a}}{a^{2}} + \frac{\dot{a}^{3}}{a^{2}}(-2) = \frac{8\pi G}{3c^{2}}\dot{p} + \frac{2k c^{2}}{a^{3}}\dot{a}\]
+
+\[\frac{\ddot{a}\ddot{a}}{a^{2}} - \frac{\dot{a}^{3}}{a^{2}} = \frac{4\pi G}{3c^{2}}\dot{p} + \frac{k c^{2}}{a^{3}}\dot{a}\]
+
+Substituting \(\frac{\ddot{a}}{a} = -\frac{4\pi G}{3c^{2}}(1 + 3w)p\)
+
+\[\frac{\dot{a}}{a}(-\frac{4\pi G}{3c})(1 + 3w)p = \frac{4\pi G}{3c^{2}}\dot{p} + \frac{\dot{a}}{a}(\frac{k c^{2}}{a^{2}} + \frac{\dot{a}^{2}}{a^{2}})\]
+
+and Friedmann equation into it:
+
+\[\frac{\dot{a}}{a}(-\frac{4\pi G}{3c})(1 + 3w)p = \frac{4\pi G}{3c^{2}}\dot{p} + \frac{\dot{a}}{a}\frac{4\pi G}{3c} \cdot 2 \cdot p\]
+
+\[(-1)\dot{a}(1 + 3w)p = a\dot{p} + 2p\dot{a}\]
+
+\[-(3 + 3w)p\dot{a} = a\dot{p}\]
+
+\[\therefore \quad \frac{\dot{p}}{p} = -3(1 + 2w)\frac{\dot{a}}{a}.\]
