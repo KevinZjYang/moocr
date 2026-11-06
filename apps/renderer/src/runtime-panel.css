@@ -1,0 +1,223 @@
+/* 运行时就绪向导 / 模型下载面板 */
+
+.banner.ok {
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  color: var(--text);
+}
+
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: var(--scrim);
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  width: min(700px, 100%);
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 24px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modal-head h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.modal-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.modal-close {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.modal-close:hover {
+  background: var(--panel-3);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+.modal-actions .spacer {
+  flex: 1;
+}
+
+.modal-actions .danger {
+  color: var(--err);
+}
+
+.modal-foot {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.runtime-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.runtime-row {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel-2);
+}
+
+.runtime-row.missing {
+  border-color: color-mix(in srgb, var(--warn) 35%, var(--border));
+}
+
+.runtime-row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.runtime-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.runtime-row-text strong {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.runtime-row-text .muted {
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runtime-row .dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.runtime-row .dot.ok {
+  background: var(--ok);
+}
+
+.runtime-row .dot.missing {
+  background: var(--warn);
+}
+
+.runtime-pct {
+  margin-left: auto;
+  font: 11px/1 var(--mono);
+  color: var(--muted);
+}
+
+.bar {
+  height: 6px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--panel-3);
+  overflow: hidden;
+}
+
+.bar.slim {
+  height: 4px;
+  margin-top: 6px;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+
+.runtime-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.runtime-progress .bar {
+  margin-top: 0;
+  height: 8px;
+}
+
+.runtime-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font: 11.5px/1.5 var(--mono);
+  color: var(--muted);
+}
+
+/* 路径里有长目录名，优先在空格处换行，避免把 "models" 拆成两行 */
+.runtime-summary {
+  font-size: 11.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.modal-actions button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.modal-actions button.primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.modal-actions button:disabled {
+  opacity: 0.5;
+}

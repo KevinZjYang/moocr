@@ -71,7 +71,11 @@ const menuFor = (theme: ThemeMode): MenuGroup[] => [
   {
     id: 'help',
     label: '帮助',
-    items: [{ label: '关于墨客', action: 'about' }],
+    items: [
+      { label: '运行时与模型…', action: 'runtime' },
+      { kind: 'sep' },
+      { label: '关于墨客', action: 'about' },
+    ],
   },
 ];
 

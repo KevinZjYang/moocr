@@ -33,9 +33,11 @@ for (const [p, hint] of [
   }
 }
 
-if (!fs.existsSync(path.join(root, 'resources', 'models', 'Xiaomi-OCR-0.Q4_K_M.gguf'))) {
-  console.error('缺少模型文件。先执行: bash scripts/m0-fetch.sh');
-  process.exit(1);
+const localModel = path.join(root, 'resources', 'models', 'Xiaomi-OCR-0.Q4_K_M.gguf');
+if (!fs.existsSync(localModel)) {
+  // 不再拦死：应用内会弹「运行时就绪向导」，可以直接下载到 userData。
+  console.warn('提示：本地还没有模型权重，应用启动后会引导一键下载（约 700 MB）。');
+  console.warn('      也可以先跑 `npm run fetch` 预置到 resources/models。');
 }
 
 const env = { ...process.env };

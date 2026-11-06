@@ -1,6 +1,6 @@
 {
   "name": "moocr",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "本地运行的 OCR 桌面工具：图像 / PDF → Markdown，表格转 HTML、公式转 Word 公式，基于 Xiaomi-OCR-0 与 llama.cpp Vulkan 后端。",
@@ -15,7 +15,10 @@
     "dev": "node scripts/build-main.mjs && node scripts/dev-desktop.mjs",
     "start": "node scripts/build-main.mjs && node scripts/build-renderer.mjs && node scripts/start-desktop.mjs",
     "fetch": "node scripts/fetch.mjs",
-    "pack": "npm run build:main && npm run build:renderer && electron-builder --dir"
+    "pack": "npm run verify:assets && npm run build:main && npm run build:renderer && electron-builder --win nsis",
+    "runtime:manifest": "node scripts/make-runtime-manifest.mjs",
+    "verify:assets": "node scripts/verify-assets.mjs",
+    "pack:dir": "npm run verify:assets && npm run build:main && npm run build:renderer && electron-builder --win --dir"
   },
   "engines": {
     "node": ">=22"
@@ -49,7 +52,8 @@
     "appId": "app.moocr.desktop",
     "productName": "moocr",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "assets"
     },
     "files": [
       "apps/desktop/dist/**/*",
@@ -58,21 +62,39 @@
     ],
     "extraResources": [
       {
-        "from": "resources/models",
-        "to": "resources/models"
-      },
-      {
         "from": "resources/llama/bin",
-        "to": "resources/llama/bin"
+        "to": "runtime/llama/bin"
       }
     ],
     "win": {
       "target": [
-        "dir"
-      ]
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "moocr-${version}-setup-${arch}.${ext}"
     },
     "asar": true,
-    "npmRebuild": false
+    "npmRebuild": false,
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "墨客 moocr",
+      "uninstallDisplayName": "墨客 moocr",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    }
   },
   "license": "MIT",
   "keywords": [

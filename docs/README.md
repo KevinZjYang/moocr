@@ -11,6 +11,7 @@ moocr 的每个里程碑都留了实测记录。这里不是营销材料，是�
 | [M2.md](M2.md) | **Electron 桌面壳**。三栏界面、IPC 契约、预设切换 | KV 缓存会让 `prompt_tokens` 失真；`ELECTRON_RUN_AS_NODE` 会让 Electron 退化成纯 Node |
 | [M3.md](M3.md) | **PDF / 导出 / KIE**。pdfjs 拆页、Markdown → HTML/DOCX、JSON 抽取 | KIE 不认 JSON Schema 元语言，只认扁平示例对象 |
 | [M4.md](M4.md) | **截图 / 并发 / 缓存 / 打包**。全局热键、框选遮罩、结果缓存、sidecar 自愈 | 并发只对 prefill 密集型大页有效（1.59×），短页反而更慢 |
+| [M6-RUNTIME.md](M6-RUNTIME.md) | **安装包与运行时下载**。组件解析、清单与校验、断点续传、NSIS | 权重不进安装包；启动只 stat 比大小，哈希只在下载/导入时算 |
 
 ## 数据文件
 

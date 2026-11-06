@@ -10,8 +10,11 @@ import {
   stopServer,
   reclaimStaleSidecar,
   imageDataUri,
+  RuntimeMissingError,
   type RunningServer,
 } from '../../../packages/inference/src/server.ts';
+import { RuntimeService, appRoot } from './runtime-service.ts';
+import type { ComponentId, RuntimeStatus } from '../../../packages/runtime/src/index.ts';
 import { toMarkdown, toHtmlDocument, toDocxBuffer } from '../../../packages/exporters/src/index.ts';
 
 const PRESETS: Record<string, number> = {
@@ -26,25 +29,6 @@ const IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.tif', '.t
 const MAX_PDF_BYTES = 200 * 1024 * 1024;
 const PORT = 8090;
 
-/**
- * 找到「含 resources/models 的根目录」。
- *
- * 打包后资源在 process.resourcesPath（extraResources 落点），
- * 开发时从本文件位置向上找。两条路径都试，避免两套代码。
- */
-function findRoot(start: string): string {
-  const packaged = process.resourcesPath;
-  if (packaged && fs.existsSync(path.join(packaged, 'resources', 'models'))) return packaged;
-
-  let dir = start;
-  for (;;) {
-    if (fs.existsSync(path.join(dir, 'resources', 'models'))) return dir;
-    const parent = path.dirname(dir);
-    if (parent === dir) throw new Error('找不到项目根（缺少 resources/models）');
-    dir = parent;
-  }
-}
-
 // dev 运行时 Electron 默认把 userData 放在 .../Electron 下，和装机版分开；
 // 统一成 moocr，缓存与 pid 记录才不会因启动方式不同而各自为政。
 app.setName('moocr');
@@ -57,15 +41,43 @@ let activeParallel = 0;
 let pendingArgv: string[] = [];
 let capturing = false;
 let cache: ResultCache | null = null;
+let runtimeService: RuntimeService | null = null;
+
+function appendRuntimeLog(line: string): void {
+  try {
+    const dir = path.join(app.getPath('userData'), 'logs');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(path.join(dir, 'runtime.log'), `${new Date().toISOString()} ${line}\n`);
+  } catch {
+    /* 日志失败不该影响下载 */
+  }
+}
+
+/**
+ * 运行时是惰性单例：app.getPath('userData') 在 ready 之前不可靠，
+ * 且首屏 capabilities 会触发一次解析，之后复用。
+ */
+function runtime(): RuntimeService {
+  if (!runtimeService) {
+    runtimeService = new RuntimeService({
+      onProgress: (p) => send('runtime-progress', p),
+      onStatus: (s) => send('runtime-state', s),
+      log: appendRuntimeLog,
+    });
+  }
+  return runtimeService;
+}
+
 function resultCache(): ResultCache {
   if (!cache) {
-    const root = findRoot(__dirname);
-    cache = new ResultCache(
-      path.join(app.getPath('userData'), 'result-cache'),
-      path.join(root, 'resources', 'models', 'Xiaomi-OCR-0.Q4_K_M.gguf')
-    );
+    cache = new ResultCache(path.join(app.getPath('userData'), 'result-cache'), runtime().cacheKey());
   }
   return cache;
+}
+
+/** 渲染进程需要的运行时信息：不含绝对路径以外的敏感东西，直接全量给 */
+function runtimeStatus(): RuntimeStatus {
+  return runtime().status();
 }
 
 /** sidecar 被 OOM/驱动重置干掉时，HTTP 层表现为这些错误 */
@@ -165,7 +177,7 @@ async function ensureServer(preset: string, parallel = 1): Promise<RunningServer
     activeParallel = 0;
   }
 
-  const root = findRoot(__dirname);
+  const root = appRoot();
   // 上次被强杀会留下 sidecar 与 pid 记录：属于我们的就清掉重来，
   // 不是我们的（无记录/pid 不符）就报错，绝不静默复用错配置
   const stateDir = stateDirFor();
@@ -183,6 +195,7 @@ async function ensureServer(preset: string, parallel = 1): Promise<RunningServer
     ctxPerSlot,
     parallel,
     stateDir,
+    assets: runtime().paths(),
     onLog: (m) => send('server-state', { state: 'starting', preset, message: m }),
   });
   activePreset = preset;
@@ -279,19 +292,16 @@ function buildMenu(): Electron.Menu {
 
 // ---------------------------------------------------------------- IPC
 
-ipcMain.handle('capabilities', () => ({
-  presets: Object.keys(PRESETS).map((id) => ({ id, imageMaxTokens: PRESETS[id] })),
-  tasks: TASKS,
-  kieSchema: KIE_SCHEMA,
-  hasRuntime: (() => {
-    try {
-      const root = findRoot(__dirname);
-      return fs.existsSync(path.join(root, 'resources', 'models', 'Xiaomi-OCR-0.Q4_K_M.gguf'));
-    } catch {
-      return false;
-    }
-  })(),
-}));
+ipcMain.handle('capabilities', () => {
+  const status = runtimeStatus();
+  return {
+    presets: Object.keys(PRESETS).map((id) => ({ id, imageMaxTokens: PRESETS[id] })),
+    tasks: TASKS,
+    kieSchema: KIE_SCHEMA,
+    hasRuntime: status.ready,
+    runtime: status,
+  };
+});
 
 ipcMain.handle('open-files', async () => {
   const res = await dialog.showOpenDialog({
@@ -361,7 +371,10 @@ ipcMain.handle(
       parallel?: number;
       kieSchema?: Record<string, unknown> | string;
     }
-  ): Promise<{ ok: true; results: PageResult[] } | { ok: false; error: string }> => {
+  ): Promise<
+    | { ok: true; results: PageResult[] }
+    | { ok: false; error: string; code?: 'RUNTIME_MISSING'; missing?: string[] }
+  > => {
     try {
       const targets = (req.targets ?? []).filter((t) => {
         if (t.imageUri) return true;
@@ -445,6 +458,9 @@ ipcMain.handle(
       if (results.length === 0) return { ok: false, error: errors.join('; ') || '全部失败' };
       return { ok: true, results };
     } catch (e) {
+      if (e instanceof RuntimeMissingError) {
+        return { ok: false, code: e.code, missing: e.missing, error: e.message };
+      }
       return { ok: false, error: (e as Error).message };
     }
   }
@@ -521,15 +537,74 @@ ipcMain.handle('reveal', (_e, filePath: string) => {
 });
 
 // 模型缺失时给用户一个能落地的地方，而不是只说"缺文件"
-ipcMain.handle('open-models-dir', async () => {
+ipcMain.handle('runtime-open-dir', async () => {
   try {
-    const dir = path.join(findRoot(__dirname), 'resources', 'models');
-    fs.mkdirSync(dir, { recursive: true });
+    const dir = runtime().modelsDir();
     const err = await shell.openPath(dir);
     return err ? { ok: false, error: err } : { ok: true, path: dir };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
+});
+
+ipcMain.handle('open-models-dir', async () => {
+  try {
+    const dir = runtime().modelsDir();
+    const err = await shell.openPath(dir);
+    return err ? { ok: false, error: err } : { ok: true, path: dir };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+});
+
+ipcMain.handle('runtime-status', () => runtime().refresh());
+
+/** 下完立刻预热 sidecar：用户点「开始识别」时模型已经在显存里 */
+async function warmServer(): Promise<void> {
+  try {
+    await ensureServer(activePreset ?? 'standard', activeParallel || 1);
+  } catch (e) {
+    send('notice', { level: 'warn', message: `推理服务预热失败：${(e as Error).message}` });
+  }
+}
+
+ipcMain.handle('runtime-start', async (_e, ids?: ComponentId[]) => {
+  try {
+    const status = await runtime().start(ids);
+    if (status.ready) void warmServer();
+    return { ok: true, status };
+  } catch (e) {
+    return { ok: false, status: runtime().status(), error: (e as Error).message };
+  }
+});
+
+ipcMain.handle('runtime-pause', () => {
+  runtime().pause();
+  return { ok: true, status: runtime().status() };
+});
+
+ipcMain.handle('runtime-import', async () => {
+  const res = await dialog.showOpenDialog({
+    title: '选择已下载的模型文件',
+    properties: ['openFile', 'multiSelections'],
+    filters: [{ name: 'GGUF 模型', extensions: ['gguf'] }],
+  });
+  if (res.canceled || res.filePaths.length === 0) return { ok: false, canceled: true };
+  const r = await runtime().importFiles(res.filePaths);
+  return { ok: r.ok, status: r.status, error: r.error, imported: r.imported };
+});
+
+ipcMain.handle('runtime-reset', async (_e, kind: 'models' | 'all' = 'models') => {
+  // 正在推理时删权重会把 sidecar 弄成半死状态，先停
+  if (server) {
+    await stopServer(server);
+    server = null;
+    activePreset = null;
+    activeParallel = 0;
+    send('server-state', { state: 'idle' });
+  }
+  const status = await runtime().reset(kind);
+  return { ok: true, status };
 });
 
 // 窗口按钮是系统画的，CSS 管不到，主题变了要单独告诉它

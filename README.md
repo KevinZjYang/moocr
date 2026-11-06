@@ -4,7 +4,7 @@
 
 基于 [Xiaomi-OCR-0](https://huggingface.co/xiaomi-research/Xiaomi-OCR-0)（0.87B）+ llama.cpp Vulkan 后端。**全程本地，不联网，不上传。**
 
-> **下载**：Windows 版见 [Releases](https://github.com/KevinZjYang/moocr/releases)（安装包不含模型权重，首次启动会提示放哪两个文件）。
+> **下载**：Windows 版见 [Releases](https://github.com/KevinZjYang/moocr/releases)，`moocr-0.2.0-setup-x64.exe`。安装包内置 llama.cpp 运行时，**模型权重在应用内一键下载**（约 700 MB，支持断点续传与镜像回退）。
 
 ![主界面](docs/screenshot-main.png)
 
@@ -58,7 +58,17 @@ moocr 直接输出**结构化的结果**：
 
 decode 稳定 153–166 tok/s。瓶颈在图像编码（prefill），且**随像素数超线性增长**（约 950 token/MP，幂次接近平方）——所以画质档位是唯一的成本旋钮，UI 里给了四档。
 
-## 快速开始
+## 安装（Windows）
+
+下载 `moocr-0.2.0-setup-x64.exe`，双击安装（当前用户安装，不需要管理员）。首次启动会自动弹出「运行时就绪向导」：
+
+1. 点「一键下载」——llama.cpp 运行时已在安装包里，这里只下两个模型文件（529 MB + 207 MB）；
+2. 下载完自动校验 sha256、解压、预热模型，状态变绿即可识别；
+3. 已有 gguf 的话可以「导入本地文件」，不必重新下载。
+
+权重落在 `%APPDATA%\moocr\runtime\models`，升级或重装应用不会丢。全程只访问 Hugging Face / GitHub，不上传图片。
+
+## 从源码运行
 
 前置：**Node.js ≥ 22**、支持 Vulkan 的显卡驱动（Intel Arc / AMD / NVIDIA 均可）。
 
@@ -68,7 +78,7 @@ npm run fetch   # 下载 llama.cpp 运行时 + 模型权重，约 700 MB
 npm start
 ```
 
-首次启动会在 `resources/models/` 找权重；打包版则在安装目录下找。
+开发版从仓库 `resources/` 读资产；打包版从安装目录与 `%APPDATA%\moocr\runtime` 读。两边用同一份 `packages/runtime/runtime-manifest.json`，所以 `npm run fetch` 下过的文件应用内也能识别。
 
 暂不支持 CPU-only 和 macOS：前者能跑但整页要一分多钟，后者缺 Vulkan 成熟后端。
 
@@ -133,6 +143,7 @@ npm run ocr -- receipt.jpg --task kie --preset accurate --json
 apps/desktop        Electron 主进程：sidecar 生命周期、截图、缓存、导出 IPC
 apps/renderer       React 界面：预览、结果渲染、PDF 拆页（pdfjs）
 packages/core       管线：prompt、退化守卫、结果聚合
+packages/runtime    运行时资产：清单、断点续传下载、校验、解压、导入
 packages/inference  llama-server 封装：启动、健康检查、补全请求
 packages/postprocess OTSL → 表格、Markdown 规范化、退化检测
 packages/exporters  Markdown → HTML / DOCX（LaTeX → OMML）
@@ -158,6 +169,7 @@ packages/cli        命令行入口
 - [M2 · 桌面壳](docs/M2.md) —— KV 缓存导致 token 统计失真、sidecar 自愈
 - [M3 · PDF / 导出 / KIE](docs/M3.md) —— KIE 不认 JSON Schema 元语言
 - [M4 · 截图 / 并发 / 缓存 / 打包](docs/M4.md) —— 并发为什么只对大页有效
+- [M6 · 安装包与运行时下载](docs/M6-RUNTIME.md) —— 为什么权重不进安装包、断点续传怎么做
 
 ## 许可
 

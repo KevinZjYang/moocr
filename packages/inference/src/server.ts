@@ -45,7 +45,15 @@ export interface Paths {
   mmproj: string;
 }
 
-export function resolvePaths(root: string): Paths {
+/** 桌面端把运行时解析结果（env / userData / 内置 / 旧版目录）传进来 */
+export interface PathOverrides {
+  root?: string;
+  serverExe?: string;
+  model?: string;
+  mmproj?: string;
+}
+
+export function resolvePaths(root: string, overrides?: PathOverrides): Paths {
   const binDir = path.join(root, 'resources', 'llama', 'bin');
   const modelsDir = path.join(root, 'resources', 'models');
   const serverExe = path.join(binDir, 'llama-server.exe');
@@ -53,7 +61,13 @@ export function resolvePaths(root: string): Paths {
   const exe = fs.existsSync(serverExe) ? serverExe : serverExeUnix;
   const model = path.join(modelsDir, 'Xiaomi-OCR-0.Q4_K_M.gguf');
   const mmproj = path.join(modelsDir, 'Xiaomi-OCR-0.mmproj-bf16.gguf');
-  return { root, serverExe: exe, model, mmproj };
+  if (!overrides) return { root, serverExe: exe, model, mmproj };
+  return {
+    root: overrides.root ?? root,
+    serverExe: overrides.serverExe ?? exe,
+    model: overrides.model ?? model,
+    mmproj: overrides.mmproj ?? mmproj,
+  };
 }
 
 export function validatePaths(p: Paths): string[] {
@@ -62,6 +76,23 @@ export function validatePaths(p: Paths): string[] {
   if (!fs.existsSync(p.model)) missing.push(p.model);
   if (!fs.existsSync(p.mmproj)) missing.push(p.mmproj);
   return missing;
+}
+
+/**
+ * 运行时资产不全。桌面端靠 code + missing 决定弹「运行时就绪向导」而不是普通报错。
+ */
+export class RuntimeMissingError extends Error {
+  readonly code = 'RUNTIME_MISSING';
+  readonly missing: string[];
+
+  constructor(missing: string[]) {
+    super(
+      `缺少运行时资产：\n  ${missing.join('\n  ')}\n` +
+        `在应用内「设置 → 运行时与模型」下载，或把文件放到模型目录后重试。`
+    );
+    this.name = 'RuntimeMissingError';
+    this.missing = missing;
+  }
 }
 
 export function serverArgs(p: Paths, o: ServerOptions): string[] {
@@ -254,6 +285,8 @@ export interface StartOptions extends Partial<Omit<ServerOptions, 'port'>> {
   onLog?: (line: string) => void;
   /** .sidecar.json 的落点；装机后安装目录只读，桌面端传 userData */
   stateDir?: string;
+  /** 运行时资产位置；省略则用 <root>/resources/{llama,models} */
+  assets?: PathOverrides;
 }
 
 /**
@@ -261,10 +294,10 @@ export interface StartOptions extends Partial<Omit<ServerOptions, 'port'>> {
  * 否则 llama-server 会作为孤儿进程留在系统里。
  */
 export async function startServer(root: string, opts: StartOptions): Promise<RunningServer> {
-  const paths = resolvePaths(root);
+  const paths = resolvePaths(root, opts.assets);
   const missing = validatePaths(paths);
   if (missing.length) {
-    throw new Error(`缺少运行时资产：\n  ${missing.join('\n  ')}\n请先执行 bash scripts/m0-fetch.sh`);
+    throw new RuntimeMissingError(missing);
   }
 
   const options: ServerOptions = { ...DEFAULT_SERVER, ...opts, port: opts.port };

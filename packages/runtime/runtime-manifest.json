@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "llama": {
+    "version": "b12110",
+    "archives": {
+      "win32-x64": {
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12110/llama-b12110-bin-win-vulkan-x64.zip",
+        "mirrors": [],
+        "bytes": 37661146,
+        "sha256": "9732a5e48887ca54d0bfe4af4324dc85fd56cd8cda19b52df3542fa6ebe6874f"
+      }
+    }
+  },
+  "models": [
+    {
+      "id": "model",
+      "label": "Xiaomi-OCR-0 Q4_K_M",
+      "file": "Xiaomi-OCR-0.Q4_K_M.gguf",
+      "bytes": 529297664,
+      "sha256": "1e497ff06b91a3d822c543066df3e9ef69c62c5423be09d739dfa1db55630d3a",
+      "url": "https://huggingface.co/prithivMLmods/Xiaomi-OCR-0-GGUF/resolve/main/Xiaomi-OCR-0.Q4_K_M.gguf",
+      "mirrors": [
+        "https://hf-mirror.com/prithivMLmods/Xiaomi-OCR-0-GGUF/resolve/main/Xiaomi-OCR-0.Q4_K_M.gguf"
+      ]
+    },
+    {
+      "id": "mmproj",
+      "label": "视觉编码器 mmproj",
+      "file": "Xiaomi-OCR-0.mmproj-bf16.gguf",
+      "bytes": 207346624,
+      "sha256": "634d6bc95781ebf4a3f06570a59859fa5082d488db540fd474bc6b4061aec90e",
+      "url": "https://huggingface.co/prithivMLmods/Xiaomi-OCR-0-GGUF/resolve/main/Xiaomi-OCR-0.mmproj-bf16.gguf",
+      "mirrors": [
+        "https://hf-mirror.com/prithivMLmods/Xiaomi-OCR-0-GGUF/resolve/main/Xiaomi-OCR-0.mmproj-bf16.gguf"
+      ]
+    }
+  ],
+  "license": {
+    "name": "Apache-2.0",
+    "url": "https://huggingface.co/xiaomi-research/Xiaomi-OCR-0"
+  },
+  "totalBytes": 736644288
+}

@@ -3,6 +3,8 @@ import { MarkdownView } from './MarkdownView';
 import { MenuBar, type ThemeMode } from './MenuBar';
 import { renderPdf } from './pdf';
 import { applyTheme, readTheme, saveTheme } from './theme';
+import { RuntimePanel, type RuntimeProgressView, type RuntimeStatusView } from './RuntimePanel';
+import './runtime-panel.css';
 
 interface PageTimings {
   wallMs: number;
@@ -107,7 +109,12 @@ export default function App(): JSX.Element {
     tasks: string[];
     kieSchema: Record<string, unknown>;
     hasRuntime: boolean;
+    runtime?: RuntimeStatusView;
   } | null>(null);
+  const [runtime, setRuntime] = useState<RuntimeStatusView | null>(null);
+  const [runtimeOpen, setRuntimeOpen] = useState(false);
+  const [runtimeStarting, setRuntimeStarting] = useState(false);
+  const [rtProgress, setRtProgress] = useState<RuntimeProgressView | null>(null);
   const [progress, setProgress] = useState<{ index: number; total: number; file: string; done?: boolean } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -135,10 +142,14 @@ export default function App(): JSX.Element {
   const pendingFocus = useRef<string | null>(null);
 
   useEffect(() => {
-    void api.capabilities().then((c: typeof caps) => {
+    void (async () => {
+      const c = await api.capabilities();
       setCaps(c);
       if (c?.kieSchema) setSchemaText(JSON.stringify(c.kieSchema, null, 2));
-    });
+      if (c?.runtime) setRuntime(c.runtime);
+      // 首次启动缺资产：直接进入向导，而不是让用户看一行报错自己猜
+      if (c && !c.hasRuntime) setRuntimeOpen(true);
+    })();
     const offA = api.onServerState((s: ServerState) => setServer(s));
     const offB = api.onProgress((p: { index: number; total: number; file: string; phase: string }) => {
       // 主进程按完成顺序回传，用 index 只是定位，进度条按已完成张数走
@@ -146,10 +157,17 @@ export default function App(): JSX.Element {
       else setProgress({ index: p.index, total: p.total, file: p.file, done: false });
     });
     const offC = api.onMenuOpen(() => void pickFiles());
+    const offD = api.onRuntimeState((s: RuntimeStatusView) => setRuntime(s));
+    const offE = api.onRuntimeProgress((p: RuntimeProgressView) => {
+      setRtProgress(p);
+      if (p.phase === 'done' || p.phase === 'error' || p.phase === 'paused') setRuntimeStarting(false);
+    });
     return () => {
       offA();
       offB();
       offC();
+      offD();
+      offE();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -252,9 +270,58 @@ export default function App(): JSX.Element {
     [addPaths]
   );
 
+  const openModelsDir = useCallback(async () => {
+    const r = await api.openModelsDir();
+    setNotice(r.ok ? `已打开模型目录：${r.path}` : `打开失败：${r.error}`);
+  }, []);
+
+  const startRuntime = useCallback(async () => {
+    setRuntimeStarting(true);
+    setNotice(null);
+    try {
+      const r = await api.runtimeStart();
+      if (r.status) setRuntime(r.status);
+      if (!r.ok) setNotice(`下载失败：${r.error ?? '未知错误'}`);
+    } finally {
+      setRuntimeStarting(false);
+    }
+  }, []);
+
+  const pauseRuntime = useCallback(() => {
+    void api.runtimePause().then((r: { status: RuntimeStatusView }) => setRuntime(r.status));
+  }, []);
+
+  const importRuntime = useCallback(async () => {
+    const r = await api.runtimeImport();
+    if (r.status) setRuntime(r.status);
+    if (r.canceled) return;
+    setNotice(
+      r.ok
+        ? `已导入：${(r.imported ?? []).join('、') || '模型文件'}`
+        : `导入失败：${r.error ?? '文件名或大小对不上清单'}`
+    );
+  }, []);
+
+  const resetRuntime = useCallback(async (kind: 'models' | 'all') => {
+    const r = await api.runtimeReset(kind);
+    if (r.status) setRuntime(r.status);
+    setRtProgress(null);
+    setNotice('已删除应用内下载的权重，可重新下载或导入。');
+  }, []);
+
+  const retryRuntime = useCallback(() => {
+    setRtProgress(null);
+    void startRuntime();
+  }, [startRuntime]);
+
   const run = useCallback(
     async (only?: Item[]) => {
       if (busy) return;
+      if (runtime && !runtime.ready) {
+        setRuntimeOpen(true);
+        setNotice('先把运行时资产下载完，才能开始识别。');
+        return;
+      }
       // 无参时只跑待识别的；显式传入（截图后自动识别、单文件重跑）就照单执行
       const targets = (only ?? items.filter((i) => isPending(i, task, preset))).filter((i) => i.status !== 'running');
       if (targets.length === 0) return;
@@ -297,6 +364,10 @@ export default function App(): JSX.Element {
         });
 
         if (!res.ok) {
+          if (res.code === 'RUNTIME_MISSING') {
+            setRuntimeOpen(true);
+            void api.runtimeStatus().then((s: RuntimeStatusView) => setRuntime(s));
+          }
           setNotice(res.error);
           setItems((prev) =>
             prev.map((i) => (targetKeys.has(i.key) ? { ...i, status: 'error', error: res.error } : i))
@@ -327,7 +398,7 @@ export default function App(): JSX.Element {
         setProgress(null);
       }
     },
-    [busy, items, task, preset, parallel, schemaText]
+    [busy, items, task, preset, parallel, schemaText, runtime]
   );
 
   // 截图完成：加入列表并立刻识别这一张
@@ -437,6 +508,9 @@ export default function App(): JSX.Element {
         case 'theme-dark':
           setTheme(action.slice('theme-'.length) as ThemeMode);
           break;
+        case 'runtime':
+          setRuntimeOpen(true);
+          break;
         default:
           void api.menuAction(action);
       }
@@ -517,13 +591,15 @@ export default function App(): JSX.Element {
           <button
             className="primary"
             onClick={() => void run()}
-            disabled={busy || items.length === 0 || pendingCount === 0}
+            disabled={busy || items.length === 0 || pendingCount === 0 || !runtime?.ready}
             title={
-              items.length === 0
-                ? '还没有打开文件'
-                : pendingCount === 0
-                  ? '所有文件都是当前设置的结果'
-                  : `只识别 ${pendingCount} 个待处理文件`
+              !runtime?.ready
+                ? '运行时未就绪：先下载模型权重'
+                : items.length === 0
+                  ? '还没有打开文件'
+                  : pendingCount === 0
+                    ? '所有文件都是当前设置的结果'
+                    : `只识别 ${pendingCount} 个待处理文件`
             }
           >
             {busy ? '识别中…' : pendingCount === 0 && items.length > 0 ? '已是最新' : items.length === 0 ? '识别' : `识别 ${pendingCount}`}
@@ -559,16 +635,13 @@ export default function App(): JSX.Element {
         </div>
       </header>
 
-      {caps && !caps.hasRuntime && (
+      {runtime && !runtime.ready && (
         <div className="banner error">
-          缺少模型权重：<code>resources/models/Xiaomi-OCR-0.Q4_K_M.gguf</code> 与 <code>Xiaomi-OCR-0.mmproj-bf16.gguf</code>。
-          源码运行用 <code>npm run fetch</code> 下载，或<button
-            className="inline-action"
-            onClick={() => void api.openModelsDir().then((r) => setNotice(r.ok ? `已打开模型目录：${r.path}` : `打开失败：${r.error}`))}
-          >
-            打开模型目录
+          运行时未就绪：还缺 {runtime.missing.length} 个文件。
+          <button className="inline-action" onClick={() => setRuntimeOpen(true)}>
+            打开运行时就绪向导
           </button>
-          手动放入。
+          一键下载约 700 MB，支持断点续传；也可以导入本地已有的 .gguf。
         </div>
       )}
       {notice && <div className="banner warn">{notice}</div>}
@@ -718,6 +791,21 @@ export default function App(): JSX.Element {
           )}
         </section>
       </main>
+
+      {runtimeOpen && (
+        <RuntimePanel
+          status={runtime}
+          progress={rtProgress}
+          starting={runtimeStarting}
+          onStart={() => void startRuntime()}
+          onRetry={retryRuntime}
+          onPause={pauseRuntime}
+          onImport={() => void importRuntime()}
+          onOpenDir={() => void openModelsDir()}
+          onReset={(kind) => void resetRuntime(kind)}
+          onClose={() => setRuntimeOpen(false)}
+        />
+      )}
     </div>
   );
 }

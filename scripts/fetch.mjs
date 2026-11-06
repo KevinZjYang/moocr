@@ -1,49 +1,32 @@
 /**
  * 拉取运行时资产：llama.cpp（Vulkan）、Xiaomi-OCR-0 GGUF、示例图。
  *
- *   npm run fetch          # 缺什么下什么，已完整则跳过
+ *   npm run fetch             # 缺什么下什么，已完整则跳过
  *   npm run fetch -- --force
  *
- * 跨平台，只用 Node 内置模块。断点续传 + 大小校验 + 停顿重试 —— HF 的连接
- * 会静默断流，不带停顿检测会挂在那里不动（M0 时踩过）。
+ * URL / 大小 / sha256 全部来自 packages/runtime/runtime-manifest.json —— 应用内
+ * 下载用的是同一份清单，避免「命令行能跑、装完却少文件」。
+ * 跨平台，只用 Node 内置模块；断点续传 + 大小与哈希校验 + 停顿重试。
  */
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { fileURLToPath } from 'node:url';
 
 const exec = promisify(execFile);
 
-const ROOT = process.cwd();
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FORCE = process.argv.includes('--force');
+const MANIFEST = JSON.parse(
+  fs.readFileSync(path.join(ROOT, 'packages/runtime/runtime-manifest.json'), 'utf8')
+);
 
-const MODEL_BASE = 'https://huggingface.co/prithivMLmods/Xiaomi-OCR-0-GGUF/resolve/main';
 const PIC_BASE = 'https://huggingface.co/xiaomi-research/Xiaomi-OCR-0/resolve/main/example_pics';
-const LLAMA_RELEASE = 'https://github.com/ggml-org/llama.cpp/releases/download/b12110';
-
-/** 这个版本对应 llama.cpp nightly b12110；升级时同步改文件名前缀 */
-const PLATFORM_ARCHIVES = {
-  'win32-x64': 'llama-b12110-bin-win-vulkan-x64.zip',
-  'linux-x64': 'llama-b12110-bin-ubuntu-vulkan-x64.zip',
-};
-
-const FILES = [
-  {
-    url: `${MODEL_BASE}/Xiaomi-OCR-0.Q4_K_M.gguf`,
-    dest: 'resources/models/Xiaomi-OCR-0.Q4_K_M.gguf',
-    size: 529_297_664,
-    label: 'Xiaomi-OCR-0 Q4_K_M',
-  },
-  {
-    url: `${MODEL_BASE}/Xiaomi-OCR-0.mmproj-bf16.gguf`,
-    dest: 'resources/models/Xiaomi-OCR-0.mmproj-bf16.gguf',
-    size: 207_346_624,
-    label: '视觉编码器 mmproj',
-  },
-];
 
 const SAMPLES = [
   'qianziwen.jpeg', 'qianziwen.md',
@@ -53,6 +36,7 @@ const SAMPLES = [
 ];
 
 const mb = (n) => (n / 1024 / 1024).toFixed(1) + ' MB';
+const rel = (p) => path.relative(ROOT, p) || '.';
 
 async function sizeOf(p) {
   try {
@@ -60,6 +44,12 @@ async function sizeOf(p) {
   } catch {
     return 0;
   }
+}
+
+async function sha256(file) {
+  const h = crypto.createHash('sha256');
+  for await (const chunk of fs.createReadStream(file)) h.update(chunk);
+  return h.digest('hex');
 }
 
 /** 简单进度：每 500 ms 打一行，终端里能看到在动 */
@@ -76,13 +66,22 @@ function progressPrinter(label) {
   };
 }
 
-/** 带续传的单文件下载：最多 8 次，30 秒内低于 20 KB/s 视为断流 */
-async function download(url, dest, expectedSize) {
+/**
+ * 带续传的下载：最多 8 次尝试，镜像轮流上，30 秒没数据视为断流。
+ * 有 sha256 时在完整后核对，坏包删掉重来（否则续传会一直续在坏数据上）。
+ */
+async function download(urls, dest, expectedSize, expectedSha) {
   await fsp.mkdir(path.dirname(dest), { recursive: true });
+  const list = urls.filter(Boolean);
 
   for (let attempt = 1; attempt <= 8; attempt++) {
+    const url = list[(attempt - 1) % list.length];
     let have = await sizeOf(dest);
-    if (expectedSize > 0 && have >= expectedSize) return;
+    if (expectedSize > 0 && have === expectedSize) {
+      if (!expectedSha || (await sha256(dest)) === expectedSha) return;
+      await fsp.rm(dest, { force: true });
+      have = 0;
+    }
     if (attempt > 1) await new Promise((r) => setTimeout(r, 1500));
 
     const headers = {};
@@ -99,7 +98,15 @@ async function download(url, dest, expectedSize) {
       armIdle();
       const res = await fetch(url, { headers, signal: ctrl.signal, redirect: 'follow' });
 
-      if (res.status === 416) return; // 已经完整
+      if (res.status === 416) {
+        // 本地 .part 比服务器认为的还长：要么已完整，要么是坏包
+        const now = await sizeOf(dest);
+        if (expectedSize > 0 && now === expectedSize && (!expectedSha || (await sha256(dest)) === expectedSha)) {
+          return;
+        }
+        await fsp.rm(dest, { force: true });
+        continue;
+      }
       if (res.status !== 200 && res.status !== 206) throw new Error(`HTTP ${res.status}`);
 
       if (res.status === 200) have = 0; // 服务器不支持续传，从头写
@@ -119,8 +126,19 @@ async function download(url, dest, expectedSize) {
       process.stdout.write('\n');
 
       const now = await sizeOf(dest);
-      if (!total || now >= total) return;
-      process.stdout.write(`    不完整 ${mb(now)} / ${mb(total)}，重试 ${attempt}/8\n`);
+      if (total && now < total) {
+        process.stdout.write(`    不完整 ${mb(now)} / ${mb(total)}，重试 ${attempt}/8\n`);
+        continue;
+      }
+      if (expectedSha) {
+        const digest = await sha256(dest);
+        if (digest !== expectedSha) {
+          await fsp.rm(dest, { force: true });
+          process.stdout.write(`    sha256 不符，删掉重下（${attempt}/8）\n`);
+          continue;
+        }
+      }
+      return;
     } catch (e) {
       clearTimeout(idleTimer);
       process.stdout.write(`\n    中断（${e.message}），重试 ${attempt}/8\n`);
@@ -128,16 +146,9 @@ async function download(url, dest, expectedSize) {
   }
 
   const now = await sizeOf(dest);
-  if (expectedSize > 0 && now < expectedSize) {
-    throw new Error(`${dest} 只有 ${mb(now)}，期望 ${mb(expectedSize)}`);
+  if (expectedSize > 0 && now !== expectedSize) {
+    throw new Error(`${rel(dest)} 只有 ${mb(now)}，期望 ${mb(expectedSize)}`);
   }
-}
-
-async function sha256(file) {
-  const { createHash } = await import('node:crypto');
-  const h = createHash('sha256');
-  for await (const chunk of fs.createReadStream(file)) h.update(chunk);
-  return h.digest('hex');
 }
 
 async function unzip(zip, dir) {
@@ -150,57 +161,90 @@ async function unzip(zip, dir) {
   }
 }
 
-async function main() {
-  const asset = PLATFORM_ARCHIVES[`${process.platform}-${process.arch}`];
-  if (!asset) {
-    console.log(`没有为 ${process.platform}-${process.arch} 准备的 llama.cpp 构建。`);
-    console.log('请自行下载 Vulkan 版并放到 resources/llama/bin/，或改用 CPU 版；');
-    console.log('模型文件仍会照常下载。');
+/** 压缩包内层可能带一级目录，找到 llama-server 所在目录后把内容平铺进 bin */
+async function installLlamaBin(zip, binDir) {
+  const tmp = path.join(ROOT, 'resources/llama/.extract');
+  await fsp.rm(tmp, { recursive: true, force: true });
+  await unzip(zip, tmp);
+
+  const exeName = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
+  const entries = fs.readdirSync(tmp, { recursive: true, withFileTypes: false });
+  const found = entries.find(
+    (p) => typeof p === 'string' && path.basename(p) === exeName
+  );
+  if (!found) throw new Error(`压缩包里没有 ${exeName}`);
+
+  const srcDir = path.dirname(path.join(tmp, found));
+  await fsp.mkdir(binDir, { recursive: true });
+  for (const name of await fsp.readdir(srcDir)) {
+    await fsp.cp(path.join(srcDir, name), path.join(binDir, name), { recursive: true });
   }
+  await fsp.rm(tmp, { recursive: true, force: true });
+}
+
+async function main() {
+  const platformKey = `${process.platform}-${process.arch}`;
+  const archive = MANIFEST.llama.archives[platformKey];
 
   console.log('\n[1/3] llama.cpp（Vulkan 推理后端）');
-  if (asset) {
-    const zip = 'resources/llama/llama-vulkan.zip';
-    const binDir = 'resources/llama/bin';
-    const serverName = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
-    const present = await sizeOf(path.join(binDir, serverName));
+  if (!archive) {
+    console.log(`    没有为 ${platformKey} 准备的 llama.cpp 构建。`);
+    console.log('    请自行下载 Vulkan 版并放到 resources/llama/bin/；模型仍会照常下载。');
+  } else {
+    const binDir = path.join(ROOT, 'resources/llama/bin');
+    const exeName = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
+    const present = await sizeOf(path.join(binDir, exeName));
     if (present > 0 && !FORCE) {
-      console.log('    已存在，跳过解压');
+      console.log(`    已存在（${rel(binDir)}），跳过`);
     } else {
-      await download(`${LLAMA_RELEASE}/${asset}`, zip, 0);
-      await unzip(zip, binDir);
-      console.log(`    解压到 ${binDir}`);
+      const zip = path.join(
+        ROOT,
+        `resources/llama/llama-${MANIFEST.llama.version}-${platformKey}.zip`
+      );
+      console.log(`    下载 ${archive.url}`);
+      await download([archive.url, ...(archive.mirrors ?? [])], zip, archive.bytes, archive.sha256);
+      await installLlamaBin(zip, binDir);
+      console.log(`    解压到 ${rel(binDir)}`);
     }
   }
 
   console.log('\n[2/3] 模型权重（约 700 MB）');
-  for (const f of FILES) {
-    const have = await sizeOf(f.dest);
-    if (have >= f.size && !FORCE) {
-      console.log(`    ${f.label}：已完整（${mb(have)}）`);
+  for (const model of MANIFEST.models) {
+    const dest = path.join(ROOT, 'resources/models', model.file);
+    const have = await sizeOf(dest);
+    if (have === model.bytes && !FORCE) {
+      console.log(`    ${model.label ?? model.file}：已完整（${mb(have)}）`);
       continue;
     }
-    console.log(`    ${f.label}：${have ? `续传自 ${mb(have)}` : '开始下载'}`);
-    await download(f.url, f.dest, f.size);
-    console.log(`    完成 ${mb(await sizeOf(f.dest))}`);
+    console.log(`    ${model.label ?? model.file}：${have ? `续传自 ${mb(have)}` : '开始下载'}`);
+    await download([model.url, ...(model.mirrors ?? [])], dest, model.bytes, model.sha256);
+    console.log(`    完成 ${mb(await sizeOf(dest))}`);
   }
 
   console.log('\n[3/3] 示例图片与参考输出');
   for (const name of SAMPLES) {
-    const dest = path.join('fixtures', name);
+    const dest = path.join(ROOT, 'fixtures', name);
     if ((await sizeOf(dest)) > 0 && !FORCE) continue;
     try {
-      await download(`${PIC_BASE}/${name}`, dest, 0);
+      await download([`${PIC_BASE}/${name}`], dest, 0);
     } catch (e) {
       console.log(`    ${name} 失败：${e.message}（不影响使用）`);
     }
   }
 
   console.log('\n校验');
-  for (const f of FILES) {
-    const size = await sizeOf(f.dest);
-    const digest = size ? (await sha256(f.dest)).slice(0, 16) : 'missing';
-    console.log(`  ${path.basename(f.dest)}  ${mb(size)}  sha256:${digest}…`);
+  let ok = true;
+  for (const model of MANIFEST.models) {
+    const dest = path.join(ROOT, 'resources/models', model.file);
+    const size = await sizeOf(dest);
+    const digest = size ? await sha256(dest) : 'missing';
+    const pass = size === model.bytes && digest === model.sha256;
+    if (!pass) ok = false;
+    console.log(`  ${pass ? 'ok  ' : 'FAIL'} ${model.file}  ${mb(size)}  sha256:${String(digest).slice(0, 16)}…`);
+  }
+  if (!ok) {
+    console.error('\n有文件不完整，重跑 `npm run fetch` 会续传；网络不稳可多试几次。');
+    process.exit(1);
   }
 
   console.log('\n完成。运行 `npm start` 启动桌面应用，或 `npm run ocr -- 图片路径`。');
